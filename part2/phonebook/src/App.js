@@ -13,7 +13,14 @@ const App = () => {
   const handleSubmit = (event) => {
     event.preventDefault()
     const newPerson = {name: newName}
-    setPersons(persons.concat(newPerson))
+    const found = persons.filter(person => person.name.toLowerCase().includes(newName.toLowerCase()))
+    
+    if(found.length === 0){
+      setPersons(persons.concat(newPerson))
+    }
+    else{
+      alert(`${newName} is already in phonebook`)
+    }
     setNewName('')
   }
 
