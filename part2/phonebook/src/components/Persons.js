@@ -2,7 +2,7 @@ import React from 'react'
 
 const Persons = ({ persons }) => (
     <ul>
-        { persons.map(person => <li key={ person.name }>{ person.name } {person.number}</li>) }
+        { persons.map(person => <li key={ person.id }>{ person.name } {person.number}</li>) }
     </ul>
 )
 
