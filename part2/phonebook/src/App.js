@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import Notification from './components/Notification'
 import personService from './services/personService' 
 
 const App = () => {
@@ -10,16 +11,32 @@ const App = () => {
   const [ newName, setNewName ] = useState('')
   const [ newFilter, setNewFilter ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
+  const [ message, setMessage ] = useState(null)
+  const [ error, setError ] = useState(false)
+
+  const getData = () => {
+    return personService
+            .getAll()
+            .then(data => {
+              setPersons(data)
+              setShowPersons(data)
+            })
+  }
 
   useEffect(() =>{
-    personService
-      .getAll()
-      .then(data => {
-        setPersons(data)
-        setShowPersons(data)
+    getData()
+      .catch(error => {
+        setError(true)
+        setMessage('Network error I guess')
+        setTimeout(() => setMessage(null), 3000)
       })
   },[])
 
+  const renderMessage = (message, error) => {
+    setError(error)
+    setMessage(message)
+    setTimeout(() => setMessage(null), 3000)
+  }
   const handleNewName = (event) => {
     setNewName(event.target.value)
   }
@@ -37,11 +54,12 @@ const App = () => {
       personService
         .create(newPerson)
         .then(data => {
-          personService
-            .getAll()
+          getData()
             .then(data => {
-              setPersons(data)
-              setShowPersons(data)
+              renderMessage(`${newName} was added successfully`,false)
+            })
+            .catch(error => {
+              renderMessage('Network error I guess',true)
             })
         })
     }
@@ -53,7 +71,12 @@ const App = () => {
           .update(newPerson)
           .then(data => {
             setPersons(persons.map(person => person.id === data.id ? data : person))
-            setShowPersons(persons.map(person => person.id == data.id ? data : person))
+            setShowPersons(persons.map(person => person.id === data.id ? data : person))
+            renderMessage(`${newName} was updated successfully`,false)
+          })
+          .catch(error => {
+            renderMessage(`${newName} was already removed from the server`,true)
+            getData()
           })
       }
     }
@@ -84,7 +107,11 @@ const App = () => {
             .then(data => {
               setPersons(data)
               setShowPersons(data)
+              renderMessage(`${name} was deleted successfully`,false)
             })
+        })
+        .catch(error => {
+          renderMessage('Network error I guess',true)
         })
     }
   }
@@ -92,6 +119,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={ message } error={ error } />
       <Filter filter={ newFilter } handleFilter={ handleNewFilter }/>
       <h2>Add new</h2> 
       <PersonForm handleSubmit={ handleSubmit } newName={ newName } handleNewName={ handleNewName } newNumber={ newNumber } handleNewNumber={handleNewNumber } /> 
