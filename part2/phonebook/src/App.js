@@ -48,7 +48,7 @@ const App = () => {
   const handleSubmit = (event) => {
     event.preventDefault()
     let newPerson = {name: newName, number: newNumber}
-    const found = persons.filter(person => person.name.toLowerCase().includes(newName.toLowerCase()))
+    const found = persons.filter(person => person.name.toLowerCase() === (newName.toLowerCase()))
     
     if(found.length === 0){
       personService
@@ -56,11 +56,16 @@ const App = () => {
         .then(data => {
           getData()
             .then(data => {
+              // console.log(data)
               renderMessage(`${newName} was added successfully`,false)
             })
             .catch(error => {
-              renderMessage('Network error I guess',true)
+              // console.log(error)
+              renderMessage(error.response.data,true)
             })
+        })
+        .catch(error => {
+          renderMessage(error.response.data.error, true)
         })
     }
     else{
